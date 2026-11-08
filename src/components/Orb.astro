@@ -1,0 +1,296 @@
+---
+interface Props { brand?: { x: number; y: number; scale: number; grow: number; bare?: boolean } }
+const { brand } = Astro.props;
+---
+<div class="scene" aria-hidden="true">
+  <canvas id="orb" data-brand={brand ? "1" : undefined} data-x={brand?.x} data-y={brand?.y} data-scale={brand?.scale} data-grow={brand?.grow} data-bare={brand?.bare ? "1" : undefined}></canvas>
+</div>
+
+<script>
+  import * as THREE from "three";
+
+  const canvas = document.getElementById("orb") as HTMLCanvasElement | null;
+  const supportsGL = (() => {
+    try { return !!document.createElement("canvas").getContext("webgl2"); } catch { return false; }
+  })();
+
+  if (canvas && supportsGL) {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const bd = canvas.dataset;
+    const brand = bd.brand ? { x: +bd.x!, y: +bd.y!, scale: +bd.scale!, grow: +bd.grow! } : null;
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: window.innerWidth >= 1000, alpha: true, powerPreference: "high-performance" });
+    const small = window.innerWidth < 1000;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, small ? 1.5 : 2));
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
+    camera.position.set(0, 0, 6.6);
+
+    const noise = /* glsl */ `
+      vec3 mod289(vec3 x){return x-floor(x*(1.0/289.0))*289.0;}
+      vec4 mod289(vec4 x){return x-floor(x*(1.0/289.0))*289.0;}
+      vec4 permute(vec4 x){return mod289(((x*34.0)+10.0)*x);}
+      vec4 taylorInvSqrt(vec4 r){return 1.79284291400159-0.85373472095314*r;}
+      float snoise(vec3 v){
+        const vec2 C=vec2(1.0/6.0,1.0/3.0);const vec4 D=vec4(0.0,0.5,1.0,2.0);
+        vec3 i=floor(v+dot(v,C.yyy));vec3 x0=v-i+dot(i,C.xxx);
+        vec3 g=step(x0.yzx,x0.xyz);vec3 l=1.0-g;vec3 i1=min(g.xyz,l.zxy);vec3 i2=max(g.xyz,l.zxy);
+        vec3 x1=x0-i1+C.xxx;vec3 x2=x0-i2+C.yyy;vec3 x3=x0-D.yyy;
+        i=mod289(i);
+        vec4 p=permute(permute(permute(i.z+vec4(0.0,i1.z,i2.z,1.0))+i.y+vec4(0.0,i1.y,i2.y,1.0))+i.x+vec4(0.0,i1.x,i2.x,1.0));
+        float n_=0.142857142857;vec3 ns=n_*D.wyz-D.xzx;
+        vec4 j=p-49.0*floor(p*ns.z*ns.z);vec4 x_=floor(j*ns.z);vec4 y_=floor(j-7.0*x_);
+        vec4 x=x_*ns.x+ns.yyyy;vec4 y=y_*ns.x+ns.yyyy;vec4 h=1.0-abs(x)-abs(y);
+        vec4 b0=vec4(x.xy,y.xy);vec4 b1=vec4(x.zw,y.zw);
+        vec4 s0=floor(b0)*2.0+1.0;vec4 s1=floor(b1)*2.0+1.0;vec4 sh=-step(h,vec4(0.0));
+        vec4 a0=b0.xzyw+s0.xzyw*sh.xxyy;vec4 a1=b1.xzyw+s1.xzyw*sh.zzww;
+        vec3 p0=vec3(a0.xy,h.x);vec3 p1=vec3(a0.zw,h.y);vec3 p2=vec3(a1.xy,h.z);vec3 p3=vec3(a1.zw,h.w);
+        vec4 norm=taylorInvSqrt(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3)));
+        p0*=norm.x;p1*=norm.y;p2*=norm.z;p3*=norm.w;
+        vec4 m=max(0.5-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.0);m=m*m;
+        return 105.0*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));
+      }
+    `;
+
+    const uniforms = {
+      uTime: { value: 0 },
+      uGrow: { value: 0 },
+      uHover: { value: new THREE.Vector3(0, 0, 1) },
+    };
+
+    const material = new THREE.ShaderMaterial({
+      uniforms,
+      vertexShader: /* glsl */ `
+        uniform float uTime;
+        varying vec3 vNormal;
+        varying vec3 vObj;
+        varying vec3 vView;
+        varying float vDent;
+        ${noise}
+        float field(vec3 d){
+          return snoise(d*0.9+vec3(0.0,uTime*0.1,0.0))*0.85 + snoise(d*2.0-vec3(uTime*0.07))*0.15;
+        }
+        vec3 shape(vec3 d){ return d*(1.0+field(d)*0.13); }
+        void main(){
+          vec3 d=normalize(position);
+          vec3 t=normalize(cross(d,abs(d.y)>0.99?vec3(1.0,0.0,0.0):vec3(0.0,1.0,0.0)));
+          vec3 b=normalize(cross(d,t));
+          vec3 p=shape(d);
+          vec3 pa=shape(normalize(d+t*0.01));
+          vec3 pb=shape(normalize(d+b*0.01));
+          vec3 n=normalize(cross(pa-p,pb-p));
+          if(dot(n,d)<0.0)n=-n;
+          vDent=field(d);
+          vObj=p;
+          vec4 world=modelMatrix*vec4(p,1.0);
+          vNormal=normalize(mat3(modelMatrix)*n);
+          vView=normalize(cameraPosition-world.xyz);
+          gl_Position=projectionMatrix*viewMatrix*world;
+        }
+      `,
+      fragmentShader: /* glsl */ `
+        uniform float uTime;
+        uniform float uGrow;
+        uniform vec3 uHover;
+        varying vec3 vNormal;
+        varying vec3 vObj;
+        varying vec3 vView;
+        varying float vDent;
+        ${noise}
+        vec3 env(vec3 r){
+          float up=smoothstep(-0.3,0.9,r.y);
+          vec3 c=mix(vec3(0.03,0.06,0.05),vec3(1.0,0.72,0.5),up);
+          c+=vec3(0.35,0.9,0.8)*pow(max(dot(r,normalize(vec3(-0.8,0.2,0.4))),0.0),12.0)*0.6;
+          return c;
+        }
+        void main(){
+          vec3 n=normalize(vNormal);
+          vec3 v=normalize(vView);
+          vec3 l=normalize(vec3(0.6,0.8,0.7));
+          float big=snoise(vObj*1.7+vec3(0.0,0.0,uTime*0.03))*0.5+0.5;
+          float fine=snoise(vObj*7.0)*0.5+0.5;
+          float grain=snoise(vObj*22.0)*0.5+0.5;
+          float crevice=smoothstep(0.2,-0.6,vDent);
+          float near=smoothstep(1.4,0.2,distance(normalize(vObj),uHover));
+          float m=big*0.62+fine*0.26+grain*0.12+crevice*0.3;
+          float th=1.3-uGrow*1.05-near*0.18;
+          float pat=smoothstep(th-0.04,th+0.06,m);
+          vec3 r=reflect(-v,n);
+          float ndl=max(dot(n,l),0.0);
+          float fres=pow(1.0-max(dot(n,v),0.0),3.0);
+          vec3 copper=vec3(0.78,0.44,0.27);
+          vec3 copperLit=copper*env(r)*1.0+copper*(0.12+ndl*0.5);
+          float spec=pow(max(dot(r,l),0.0),60.0);
+          copperLit+=vec3(1.0,0.82,0.62)*spec*1.4;
+          copperLit+=vec3(0.5,0.9,0.8)*fres*0.25;
+          vec3 pg=mix(vec3(0.12,0.38,0.32),vec3(0.36,0.72,0.62),fine);
+          pg=mix(pg,vec3(0.62,0.9,0.82),grain*0.25);
+          vec3 patinaLit=pg*(0.28+ndl*0.85)+vec3(0.6,0.95,0.85)*fres*0.18;
+          float edge=smoothstep(th-0.06,th,m)*(1.0-smoothstep(th,th+0.05,m));
+          vec3 col=mix(copperLit,patinaLit,pat);
+          col=mix(col,vec3(0.22,0.12,0.07),edge*0.6);
+          gl_FragColor=vec4(col,1.0);
+        }
+      `,
+    });
+
+    const orb = new THREE.Mesh(new THREE.IcosahedronGeometry(1, small ? 64 : 120), material);
+    scene.add(orb);
+
+    const count = small ? 110 : 220;
+    const positions = new Float32Array(count * 3);
+    const seeds = new Float32Array(count);
+    for (let i = 0; i < count; i++) {
+      const r = 1.8 + Math.random() * 2.4;
+      const th = Math.random() * Math.PI * 2;
+      const ph = Math.acos(2 * Math.random() - 1);
+      positions[i * 3] = r * Math.sin(ph) * Math.cos(th);
+      positions[i * 3 + 1] = r * Math.cos(ph);
+      positions[i * 3 + 2] = r * Math.sin(ph) * Math.sin(th) * 0.6;
+      seeds[i] = Math.random();
+    }
+    const pGeo = new THREE.BufferGeometry();
+    pGeo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    pGeo.setAttribute("seed", new THREE.BufferAttribute(seeds, 1));
+    const pMat = new THREE.ShaderMaterial({
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      uniforms: { uTime: uniforms.uTime, uGrow: uniforms.uGrow, uScale: { value: renderer.getPixelRatio() } },
+      vertexShader: /* glsl */ `
+        attribute float seed;
+        uniform float uTime;
+        uniform float uScale;
+        varying float vSeed;
+        void main(){
+          vSeed=seed;
+          vec3 p=position;
+          p.y+=sin(uTime*0.3+seed*40.0)*0.15;
+          p.x+=cos(uTime*0.2+seed*30.0)*0.1;
+          vec4 mv=modelViewMatrix*vec4(p,1.0);
+          gl_PointSize=(2.0+seed*5.0)*uScale*(4.0/-mv.z);
+          gl_Position=projectionMatrix*mv;
+        }
+      `,
+      fragmentShader: /* glsl */ `
+        uniform float uTime;
+        uniform float uGrow;
+        varying float vSeed;
+        void main(){
+          float d=length(gl_PointCoord-0.5);
+          float a=smoothstep(0.5,0.0,d);
+          vec3 c=mix(vec3(0.88,0.6,0.39),vec3(0.37,0.82,0.71),step(1.0-uGrow,vSeed));
+          float tw=0.5+0.5*sin(uTime*1.3+vSeed*60.0);
+          gl_FragColor=vec4(c,a*(0.25+tw*0.45));
+        }
+      `,
+    });
+    const flecks = new THREE.Points(pGeo, pMat);
+    scene.add(flecks);
+    if (bd.bare) flecks.visible = false;
+
+    const pointer = new THREE.Vector2(0, 0);
+    const target = new THREE.Vector2(0, 0);
+    const hoverDir = new THREE.Vector3(0, 0, 1);
+    const ray = new THREE.Raycaster();
+    const hitSphere = new THREE.Sphere(new THREE.Vector3(), 1.15);
+    window.addEventListener("pointermove", (e) => {
+      target.set((e.clientX / window.innerWidth) * 2 - 1, -((e.clientY / window.innerHeight) * 2 - 1));
+    }, { passive: true });
+
+    let narrow = false;
+    const resize = () => {
+      const w = brand ? canvas.parentElement!.clientWidth : window.innerWidth;
+      const h = brand ? canvas.parentElement!.clientHeight : window.innerHeight;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      narrow = w < 1000;
+      camera.position.z = narrow ? 8.4 : 6.6;
+      camera.updateProjectionMatrix();
+    };
+    window.addEventListener("resize", resize);
+    resize();
+
+    const hero = document.querySelector(".hero");
+    const finale = document.querySelector(".finale");
+    const visibility = (el: Element | null) => {
+      if (!el) return 0;
+      const r = el.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const seen = Math.min(r.bottom, vh) - Math.max(r.top, 0);
+      return Math.max(0, Math.min(1, seen / Math.min(r.height, vh)));
+    };
+
+    const state = { grow: 0, x: 1.5, y: 0, scale: 1, alpha: 0 };
+    const clock = new THREE.Clock();
+    const tmp = new THREE.Vector3();
+    const inv = new THREE.Matrix4();
+
+    const frame = (instant = false) => {
+      const t = clock.getElapsedTime();
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = max > 0 ? Math.min(1, window.scrollY / max) : 0;
+      const hv = visibility(hero);
+      const fv = visibility(finale);
+
+      const goalGrow = 0.06 + progress * 0.94;
+      const heroX = narrow ? 0 : 1.45;
+      const sideX = narrow ? 0.9 : 2.3;
+      const goalX = fv > 0.05 ? sideX + (0 - sideX) * fv : hv * heroX + (1 - hv) * sideX;
+      const goalY = narrow ? (fv > 0.05 ? 0.35 * fv : 0.95 * hv + (1 - hv) * 0.2) : (fv > 0.05 ? 0.25 * fv : 0);
+      const goalScale = narrow ? 0.85 + fv * 0.2 : 1 - (1 - Math.max(hv, fv)) * 0.15 + fv * 0.05;
+      const goalAlpha = Math.max(hv, fv, 0.22);
+
+      const k = instant ? 1 : 0.06;
+      if (brand) {
+        state.grow = brand.grow; state.x = brand.x; state.y = brand.y; state.scale = brand.scale; state.alpha = 1;
+      } else {
+        state.grow += (goalGrow - state.grow) * k;
+        state.x += (goalX - state.x) * k;
+        state.y += (goalY - state.y) * k;
+        state.scale += (goalScale - state.scale) * k;
+        state.alpha += (goalAlpha - state.alpha) * (instant ? 1 : 0.08);
+      }
+
+      uniforms.uTime.value = t;
+      uniforms.uGrow.value = state.grow;
+      canvas.style.opacity = state.alpha.toFixed(3);
+
+      pointer.lerp(target, 0.05);
+      orb.position.set(state.x, state.y, 0);
+      orb.scale.setScalar(state.scale);
+      orb.rotation.y = t * 0.12 + pointer.x * 0.45 + progress * 6.0;
+      orb.rotation.x = -pointer.y * 0.3 + progress * 1.4;
+      flecks.position.copy(orb.position);
+      flecks.rotation.y = t * 0.03 + pointer.x * 0.15;
+
+      hitSphere.center.copy(orb.position);
+      hitSphere.radius = 1.15 * state.scale;
+      ray.setFromCamera(pointer, camera);
+      if (ray.ray.intersectSphere(hitSphere, tmp)) {
+        inv.copy(orb.matrixWorld).invert();
+        hoverDir.copy(tmp).applyMatrix4(inv).normalize();
+        uniforms.uHover.value.lerp(hoverDir, 0.1);
+      }
+
+      renderer.render(scene, camera);
+    };
+
+    if (reduce) {
+      const still = () => frame(true);
+      still();
+      window.addEventListener("scroll", still, { passive: true });
+      window.addEventListener("resize", still);
+    } else {
+      frame(true);
+      if (!brand) state.alpha = 0;
+      renderer.setAnimationLoop(() => frame());
+    }
+    document.documentElement.classList.add("has-orb");
+  }
+</script>
+
+<style>
+  .scene { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+  canvas { width: 100%; height: 100%; display: block; opacity: 0; }
+</style>

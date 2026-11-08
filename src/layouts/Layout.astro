@@ -1,0 +1,35 @@
+---
+import "../styles/global.css";
+
+interface Props { title?: string; description?: string }
+const {
+  title = "Patina",
+  description = "Patina is an open-source mod platform for Discord's new native client. Themes and plugins, with a sandbox that keeps plugins away from your account.",
+} = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#070e0c" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <script is:inline>document.documentElement.classList.add("js");</script>
+  </head>
+  <body>
+    <slot />
+    <script>
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+        });
+      }, { threshold: 0.15, rootMargin: "0px 0px -8% 0px" });
+      document.querySelectorAll(".reveal, [data-observe]").forEach((el) => io.observe(el));
+    </script>
+  </body>
+</html>

@@ -1,0 +1,26 @@
+---
+import { Icon as Iconify } from "astro-icon/components";
+
+const map = {
+  github: "simple-icons:github",
+  discord: "simple-icons:discord",
+  xsocial: "simple-icons:x",
+  arrow: "ph:arrow-right-bold",
+  down: "ph:arrow-down-bold",
+  out: "ph:arrow-up-right-bold",
+  check: "ph:check-bold",
+  x: "ph:x-bold",
+  lock: "ph:lock-key-duotone",
+  brush: "ph:paint-brush-duotone",
+  plug: "ph:plugs-connected-duotone",
+  shield: "ph:shield-check-duotone",
+  cube: "ph:cube-duotone",
+  users: "ph:users-three-duotone",
+  fork: "ph:git-fork-duotone",
+  code: "ph:code-duotone",
+} as const;
+
+interface Props { name: keyof typeof map; class?: string }
+const { name, class: className } = Astro.props;
+---
+<Iconify name={map[name]} class={className} aria-hidden="true" />

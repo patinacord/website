@@ -1,0 +1,543 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Icon from "../components/Icon.astro";
+import Orb from "../components/Orb.astro";
+import Logo from "../components/Logo.astro";
+
+const discordUrl = "https://discord.com/users/859866420887289877";
+const xUrl = "https://x.com/begi_dll";
+
+const story = [
+  { tag: "Before", title: "Discord was a website in a wrapper.", text: "BetterDiscord, then Vencord, edited it while it ran. Thousands of plugins and themes grew on top of it." },
+  { tag: "Nov 2026", title: "Then Discord announced a rewrite in Rust.", text: "Desktop, mobile and the web version too. Faster, lighter, compiled. No website left to edit." },
+  { tag: "Test build", title: "Every old mod stops working.", text: "Vencord's author said it plainly: if this ships, current mods stop existing. The new app gives the old tricks nothing to grab." },
+  { tag: "After", title: "Something has to grow back.", text: "Patina is a mod platform written for the native client from the first line. Keep scrolling." },
+];
+
+const first = [
+  { name: "Themes", text: "Restyle the whole client from one small file you can share." },
+  { name: "Message Logger", text: "Keep a local copy of messages that get edited or deleted." },
+  { name: "Keyword Mute", text: "Silence notifications by word, user or channel." },
+  { name: "Auto Actions", text: "Small rules that run when something happens, like joining a voice channel." },
+];
+
+const compare = [
+  { what: "What a plugin can access", old: "Everything Discord can, token included", neu: "Only what it declares" },
+  { what: "Your account token", old: "Reachable by any code running in the client", neu: "Not exposed to plugins" },
+  { what: "Permission prompt", old: "None", neu: "Shows every permission before install" },
+  { what: "A Discord update breaks it", old: "Often", neu: "First plugins don't touch internals" },
+  { what: "Works on the new Rust client", old: "No", neu: "Built for it" },
+];
+
+const roadmap = [
+  { when: "Now", title: "Groundwork", text: "Hooking test GPUI apps, mapping Discord's network protocol, designing permissions." },
+  { when: "Next", title: "Themes and first plugins", text: "Ships after Discord's test build exists. No patching of the app itself." },
+  { when: "Then", title: "Plugin sandbox", text: "Community plugins compiled to WebAssembly, installed with a permission prompt." },
+  { when: "Later", title: "UI plugins", text: "New buttons, menus and panels inside the client." },
+];
+
+const faq = [
+  { q: "Can I download it?", a: "Not yet. Discord hasn't released a test build of the new client, so there's nothing to mod. Real work starts the day it does." },
+  { q: "Is this Vencord for the new client?", a: "No. Patina is its own project and isn't affiliated with Vencord. Vencord is a big inspiration, and any Vencord code we reuse follows its GPL-3.0 license." },
+  { q: "Will my old plugins and themes work?", a: "No. The new client has no JavaScript or CSS to hook into, so everything gets rebuilt from zero." },
+  { q: "Can I get banned?", a: "Client mods are against Discord's Terms of Service. Bans for mods are rare, but they happen. Use an alt if that worries you." },
+  { q: "Will it cost money?", a: "No. Patina is free and open source, with no paid features." },
+  { q: "Mobile?", a: "Desktop first. Mobile is much harder to modify, so it's an open question." },
+];
+
+const headline = "Discord is going native. Your mods are coming with it.".split(" ");
+---
+<Layout>
+  <Orb />
+
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="logo" href="#top" aria-label="Patina, back to top"><Logo size={34} /></a>
+      <nav aria-label="Main">
+        <a href="#story">Story</a>
+        <a href="#how">How it works</a>
+        <a href="#plugins">Plugins</a>
+        <a href="#roadmap">Roadmap</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+      <div class="nav-right">
+        <span class="soon-link" aria-disabled="true" title="Coming soon"><Icon name="github" /><span class="hide-sm">GitHub</span><em>soon</em></span>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="wrap hero-inner">
+        <h1>
+          {headline.map((w, i) => <><span class="w" style={`--i:${i}`}>{w}</span>{" "}</>)}
+        </h1>
+        <p class="lede">Patina is an open-source mod platform for Discord's new Rust client. Themes and plugins come back, and this time plugins are walled off from your account.</p>
+        <div class="ctas">
+          <a class="btn primary" href="#story">Scroll and watch it turn <Icon name="down" /></a>
+        </div>
+      </div>
+      <p class="hint">That's a lump of copper. By the bottom of this page it'll be green.</p>
+    </section>
+
+    <section id="story" class="story">
+      <div class="story-pin">
+        <div class="wrap story-inner">
+          <div class="story-rail" aria-hidden="true">
+            {story.map((s, i) => <span class="rail-step" data-i={i}>{s.tag}</span>)}
+          </div>
+          <div class="frames">
+            {story.map((s, i) => (
+              <article class="frame" data-i={i}>
+                <h2>{s.title}</h2>
+                <p>{s.text}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="how" class="how">
+      <div class="wrap how-grid">
+        <div class="stack-wrap" data-observe>
+          <div class="stack">
+            <div class="layer l1"><span>Discord</span></div>
+            <div class="layer l2"><span>Patina</span></div>
+            <div class="layer l3"><span>Plugins</span></div>
+          </div>
+        </div>
+        <div class="how-copy">
+          <h2 class="reveal">Three layers. Your account stays at the bottom.</h2>
+          <ol class="layers-list">
+            <li class="reveal" style="--d:0.05s">
+              <span class="sw sw3"></span>
+              <div><h3>Plugins</h3><p>Small WebAssembly modules. Each one says what it needs and can't do anything else.</p></div>
+            </li>
+            <li class="reveal" style="--d:0.12s">
+              <span class="sw sw2"></span>
+              <div><h3>Patina</h3><p>Loads into the new client, applies your theme, and hands plugins only what you allowed. The only layer that touches Discord.</p></div>
+            </li>
+            <li class="reveal" style="--d:0.19s">
+              <span class="sw sw1"></span>
+              <div><h3>Discord</h3><p>The new native client, with your account and token. Plugins never get this far down.</p></div>
+            </li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <section id="plugins" class="plugins">
+      <div class="wrap">
+        <h2 class="reveal">What comes back first</h2>
+        <p class="sub reveal">These work with your messages and notifications instead of the app's internals, so a Discord update won't break them.</p>
+        <ol class="first-list">
+          {first.map((f, i) => (
+            <li class="reveal" style={`--d:${i * 0.06}s`}>
+              <span class="fl-n">{String(i + 1).padStart(2, "0")}</span>
+              <span class="fl-name">{f.name}</span>
+              <span class="fl-text">{f.text}</span>
+            </li>
+          ))}
+        </ol>
+        <p class="also reveal">Also on the list, in no particular order: hidden channels, better timestamps, a read-all button, pronouns, silent typing, image zoom, translation, bookmarks, custom notification sounds. Not promises. Just where this is headed.</p>
+      </div>
+    </section>
+
+    <section class="token">
+      <div class="wrap token-grid">
+        <div class="token-copy">
+          <h2 class="reveal">Plugins never get your token.</h2>
+          <p class="reveal">Old mods don't steal anything themselves. But their plugins run inside Discord with the same access Discord has, and that includes your token. Vencord reviews the plugins it ships. A random third-party plugin can do whatever it wants.</p>
+          <p class="reveal">Patina shows exactly what a plugin wants before you install it. Your token isn't on that list, because it isn't something a plugin is allowed to ask for.</p>
+        </div>
+        <figure class="prompt" data-observe>
+          <div class="prompt-box">
+            <div class="prompt-top">
+              <span class="pi"><Icon name="plug" /></span>
+              <div><strong>Install Message Logger?</strong><small>community plugin · v0.1.0</small></div>
+            </div>
+            <ul>
+              <li class="ok" style="--k:0"><Icon name="check" />Read messages in channels you can see</li>
+              <li class="ok" style="--k:1"><Icon name="check" />Save data on this device</li>
+              <li class="off" style="--k:2"><Icon name="x" />Send messages</li>
+              <li class="off" style="--k:3"><Icon name="x" />Use the internet</li>
+              <li class="never" style="--k:4"><Icon name="lock" />Your token<em>not available to plugins</em></li>
+            </ul>
+            <div class="prompt-actions"><span>Cancel</span><span class="go">Install</span></div>
+          </div>
+          <figcaption>Sketch. The real prompt depends on what the client looks like.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="compare">
+      <div class="wrap">
+        <h2 class="reveal">Old mods vs. Patina</h2>
+        <div class="table-wrap reveal">
+          <table>
+            <thead><tr><th scope="col"><span class="sr">Question</span></th><th scope="col">Old client mods</th><th scope="col">Patina</th></tr></thead>
+            <tbody>
+              {compare.map((c) => (
+                <tr><th scope="row">{c.what}</th><td>{c.old}</td><td class="neu">{c.neu}</td></tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="roadmap" class="roadmap">
+      <div class="wrap">
+        <h2 class="reveal">Roadmap</h2>
+        <p class="sub reveal">Nothing ships until Discord ships. When the test build lands, this is the order.</p>
+        <div class="track" data-observe>
+          <div class="track-line"><span></span></div>
+          <ol>
+            {roadmap.map((r, i) => (
+              <li class={i === 0 ? "here" : ""} style={`--d:${0.2 + i * 0.12}s`}>
+                <span class="knot"></span>
+                <span class="when">{r.when}</span>
+                <h3>{r.title}</h3>
+                <p>{r.text}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <section class="help" id="join">
+      <div class="wrap">
+        <div class="join-head">
+          <h2 class="reveal">Right now it's one person and a plan.</h2>
+          <div class="join-copy reveal">
+            <p>That changes with help. If you write Rust, reverse engineer binaries for fun, like breaking sandboxes, or make themes people actually install, message me and tell me what you'd want to work on.</p>
+            <p class="needs">Looking for <span>Rust</span><i>/</i><span>reverse engineering</span><i>/</i><span>WebAssembly</span><i>/</i><span>security</span><i>/</i><span>themes</span></p>
+          </div>
+        </div>
+        <ul class="contact">
+          <li class="reveal" style="--d:0s">
+            <a href={discordUrl} target="_blank" rel="noopener">
+              <Icon name="discord" class="c-icon" />
+              <span class="c-name">Discord</span>
+              <span class="c-val">Message me directly</span>
+              <Icon name="out" class="c-arrow" />
+            </a>
+          </li>
+          <li class="reveal" style="--d:0.06s">
+            <a href={xUrl} target="_blank" rel="noopener">
+              <Icon name="xsocial" class="c-icon" />
+              <span class="c-name">@begi_dll</span>
+              <span class="c-val">Progress posts and updates</span>
+              <Icon name="out" class="c-arrow" />
+            </a>
+          </li>
+          <li class="reveal off" style="--d:0.12s">
+            <span class="c-row" aria-disabled="true">
+              <Icon name="github" class="c-icon" />
+              <span class="c-name">GitHub</span>
+              <span class="c-val">Organization goes up soon</span>
+              <em>soon</em>
+            </span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="faq" class="faq">
+      <div class="wrap faq-grid">
+        <h2 class="reveal">Questions</h2>
+        <div class="faq-list">
+          {faq.map((f) => (
+            <details class="reveal">
+              <summary>{f.q}<span class="plus" aria-hidden="true"></span></summary>
+              <p>{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="finale">
+      <div class="wrap finale-inner">
+        <h2>Fully oxidized.</h2>
+        <p>That's the whole idea. Something new grows on top of the metal. See you when Discord ships.</p>
+        <div class="ctas">
+          <a class="btn primary" href={xUrl} target="_blank" rel="noopener"><Icon name="xsocial" /> Follow @begi_dll</a>
+          <a class="btn line" href={discordUrl} target="_blank" rel="noopener"><Icon name="discord" /> Discord</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-inner">
+      <Logo class="foot-wm" size={26} />
+      <p>Free and open source under <span class="nw">GPL-3.0</span>. No paid features. No Nitro unlocks.</p>
+      <p class="legal">Not affiliated with Discord.</p>
+    </div>
+  </footer>
+</Layout>
+
+<script>
+  const story = document.querySelector<HTMLElement>(".story");
+  const frames = document.querySelectorAll<HTMLElement>(".frame");
+  const steps = document.querySelectorAll<HTMLElement>(".rail-step");
+  if (story && frames.length) {
+    let current = -1;
+    const update = () => {
+      const r = story.getBoundingClientRect();
+      const total = r.height - window.innerHeight;
+      const p = total > 0 ? Math.min(0.999, Math.max(0, -r.top / total)) : 0;
+      const i = Math.floor(p * frames.length);
+      story.style.setProperty("--p", p.toFixed(4));
+      if (i !== current) {
+        current = i;
+        frames.forEach((f, n) => f.classList.toggle("on", n === i));
+        steps.forEach((s, n) => s.classList.toggle("on", n <= i));
+      }
+    };
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    update();
+  }
+</script>
+
+<style>
+  .nav, main, .foot { position: relative; z-index: 1; }
+  section { position: relative; padding-block: clamp(96px, 12vw, 168px); }
+  h2 { font-size: clamp(2.6rem, 6vw, 5.4rem); }
+  .sub { color: var(--muted); font-size: 1.15rem; max-width: 56ch; margin-top: 18px; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  .nav { position: fixed; inset: 0 0 auto; z-index: 30; padding-top: env(safe-area-inset-top, 0px); background: rgba(7, 14, 12, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(42, 66, 57, 0.5); }
+  .nav-inner { display: flex; align-items: center; gap: 40px; height: 68px; }
+  .logo { font-size: 1.85rem; text-decoration: none; color: var(--fg); }
+  nav { display: flex; gap: 28px; font-size: 0.92rem; }
+  nav a { color: var(--muted); text-decoration: none; transition: color 0.2s; }
+  nav a:hover { color: var(--fg); }
+  .nav-right { margin-left: auto; display: flex; gap: 18px; }
+  .soon-link { display: inline-flex; align-items: center; gap: 7px; font-size: 0.9rem; color: var(--muted); cursor: not-allowed; }
+  .soon-link em, .btn em { font: 600 0.62rem/1 var(--mono); font-style: normal; text-transform: uppercase; letter-spacing: 0.06em; padding: 4px 6px; border-radius: 4px; background: rgba(224, 154, 99, 0.14); color: var(--copper); }
+
+  .hero { min-height: 100svh; display: flex; align-items: center; padding-block: 120px 88px; }
+  .hero-inner { position: relative; }
+  h1 { font-size: clamp(3rem, 7vw, 6.4rem); max-width: 11ch; line-height: 0.9; }
+  h1 .w { display: inline-block; animation: rise 1.1s var(--ease) both; animation-delay: calc(0.25s + var(--i) * 0.06s); }
+  @keyframes rise { from { opacity: 0; transform: translateY(0.4em); filter: blur(8px); } }
+  .lede { margin-top: 28px; font-size: clamp(1.08rem, 1.5vw, 1.28rem); color: var(--muted); max-width: 44ch; animation: rise 1.1s var(--ease) 0.9s both; }
+  .ctas { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 36px; }
+  .hero .ctas { animation: rise 1.1s var(--ease) 1.05s both; }
+  .btn { display: inline-flex; align-items: center; gap: 10px; height: 52px; padding: 0 24px; border-radius: 999px; font-weight: 600; font-size: 1rem; text-decoration: none; transition: transform 0.3s var(--ease), background 0.3s var(--ease), box-shadow 0.3s var(--ease); }
+  .btn.primary { background: var(--verdigris); color: var(--ink); box-shadow: 0 10px 30px -10px rgba(95, 208, 180, 0.6); }
+  .btn.primary:hover { transform: translateY(-2px); box-shadow: 0 16px 36px -10px rgba(95, 208, 180, 0.75); }
+  .btn.primary :global([data-icon]) { animation: nudge 2.4s var(--ease) infinite 2.5s; }
+  @keyframes nudge { 0%, 70%, 100% { transform: none; } 80% { transform: translateY(4px); } }
+  .btn.primary[aria-disabled="true"] { cursor: not-allowed; }
+  .btn.ghost { border: 1px solid var(--line-2); color: var(--muted); cursor: not-allowed; background: rgba(7, 14, 12, 0.6); }
+  .hint { position: absolute; right: max(20px, env(safe-area-inset-right, 0px)); bottom: 48px; font: 500 0.78rem/1.5 var(--mono); color: var(--faint); max-width: 26ch; text-align: right; animation: rise 1.2s var(--ease) 2.2s both; }
+
+  .story { height: 420vh; padding: 0; }
+  .story-pin { position: sticky; top: 0; height: 100svh; display: flex; align-items: center; overflow: hidden; }
+  .story-inner { display: grid; grid-template-columns: 220px 1fr; gap: clamp(32px, 6vw, 96px); align-items: center; }
+  .story-rail { display: grid; gap: 22px; position: relative; padding-left: 22px; }
+  .story-rail::before { content: ""; position: absolute; left: 0; top: 6px; bottom: 6px; width: 2px; background: var(--line-2); }
+  .story-rail::after { content: ""; position: absolute; left: 0; top: 6px; width: 2px; height: calc((100% - 12px) * var(--p, 0)); background: linear-gradient(var(--copper), var(--verdigris)); }
+  .rail-step { font: 600 0.8rem/1 var(--mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--faint); transition: color 0.4s var(--ease); }
+  .rail-step:global(.on) { color: var(--fg); }
+  .frames { position: relative; min-height: 360px; }
+  .frame { position: absolute; inset: 0; display: grid; align-content: center; gap: 24px; opacity: 0; transform: translateY(40px); filter: blur(10px); transition: opacity 0.7s var(--ease), transform 0.9s var(--ease), filter 0.7s var(--ease); pointer-events: none; }
+  .frame:global(.on) { opacity: 1; transform: none; filter: none; }
+  .frame h2 { font-size: clamp(2.6rem, 6.4vw, 6rem); max-width: 13ch; }
+  .frame p { font-size: clamp(1.1rem, 1.6vw, 1.35rem); color: var(--muted); max-width: 44ch; }
+  :global(html:not(.js)) .story { height: auto; }
+  :global(html:not(.js)) .story-pin { position: static; height: auto; }
+  :global(html:not(.js)) .frames { min-height: 0; display: grid; gap: 80px; }
+  :global(html:not(.js)) .frame { position: static; opacity: 1; transform: none; filter: none; }
+
+  .how-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(40px, 6vw, 96px); align-items: center; }
+  .stack-wrap { perspective: 1400px; height: 520px; display: grid; place-items: center; }
+  .stack { position: relative; width: 300px; height: 300px; transform-style: preserve-3d; transform: rotateX(58deg) rotateZ(-38deg); animation: sway 10s ease-in-out infinite alternate; }
+  @keyframes sway { to { transform: rotateX(54deg) rotateZ(-28deg); } }
+  .layer { position: absolute; inset: 0; border-radius: 26px; transition: transform 1.4s var(--ease); display: grid; place-items: end start; padding: 22px; }
+  .layer span { font-family: var(--display); font-weight: 800; font-size: 1.6rem; letter-spacing: -0.03em; }
+  .l1 { background: linear-gradient(135deg, #15241f, #0b1512); border: 1px solid var(--line-2); box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6); color: var(--muted); }
+  .l2 { background: linear-gradient(135deg, #e7a473, #a85d33); color: #2a1407; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.45); }
+  .l3 { background: linear-gradient(135deg, rgba(95, 208, 180, 0.6), rgba(44, 124, 105, 0.4)); border: 1px solid rgba(95, 208, 180, 0.7); color: var(--ink); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3); }
+  .l2, .l3 { transform: translateZ(4px); }
+  .stack-wrap:global(.in) .l2 { transform: translateZ(90px); }
+  .stack-wrap:global(.in) .l3 { transform: translateZ(180px); transition-delay: 0.15s; }
+  :global(html:not(.js)) .l2 { transform: translateZ(90px); }
+  :global(html:not(.js)) .l3 { transform: translateZ(180px); }
+  .how-copy h2 { font-size: clamp(2.4rem, 4.8vw, 4.4rem); }
+  .layers-list { list-style: none; margin: 40px 0 0; padding: 0; display: grid; gap: 26px; }
+  .layers-list li { display: grid; grid-template-columns: 18px 1fr; gap: 18px; }
+  .layers-list p { color: var(--muted); margin-top: 6px; max-width: 48ch; }
+  .sw { width: 18px; height: 18px; border-radius: 6px; margin-top: 4px; }
+  .sw1 { background: #15241f; border: 1px solid var(--line-2); }
+  .sw2 { background: var(--copper); }
+  .sw3 { background: var(--verdigris); }
+
+  .first-list { list-style: none; margin: 56px 0 0; padding: 0; border-top: 2px solid var(--fg); }
+  .first-list li { display: grid; grid-template-columns: 64px 5fr 6fr; gap: 24px; align-items: baseline; padding: 26px 0; border-bottom: 1px solid var(--line); position: relative; }
+  .first-list li::before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(95, 208, 180, 0.08), transparent 70%); opacity: 0; transition: opacity 0.4s var(--ease); pointer-events: none; }
+  .first-list li:hover::before { opacity: 1; }
+  .fl-n { font: 500 0.85rem/1 var(--mono); color: var(--copper); }
+  .fl-name { font-family: var(--display); font-weight: 800; font-variation-settings: "wdth" 80; font-size: clamp(1.8rem, 3.4vw, 3rem); letter-spacing: -0.035em; line-height: 1; transition: transform 0.5s var(--ease), color 0.4s; }
+  .first-list li:hover .fl-name { transform: translateX(10px); color: var(--verdigris); }
+  .fl-text { color: var(--muted); }
+  .also { margin-top: 40px; color: var(--muted); max-width: 70ch; font-size: 1.05rem; }
+
+  .token-grid { display: grid; grid-template-columns: 7fr 5fr; gap: clamp(40px, 6vw, 96px); align-items: center; }
+  .token h2 { max-width: 11ch; }
+  .token-copy { display: grid; gap: 22px; }
+  .token-copy p { color: var(--muted); font-size: 1.12rem; max-width: 50ch; }
+  .prompt { margin: 0; display: grid; gap: 14px; }
+  .prompt-box { background: var(--bg-2); border: 1px solid var(--line-2); border-radius: 22px; padding: 26px; box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.8); transform: perspective(1200px) rotateY(-8deg) rotateX(4deg); transition: transform 1s var(--ease); }
+  .prompt:hover .prompt-box { transform: perspective(1200px) rotateY(0) rotateX(0); }
+  .prompt-top { display: flex; gap: 14px; align-items: center; margin-bottom: 18px; }
+  .prompt-top div { display: grid; }
+  .prompt-top small { color: var(--faint); font-size: 0.82rem; }
+  .pi { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: rgba(95, 208, 180, 0.12); color: var(--verdigris); font-size: 1.3rem; }
+  .prompt ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+  .prompt li { display: flex; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 10px; font-size: 0.95rem; flex-wrap: wrap; }
+  :global(.js) .prompt li { opacity: 0; transform: translateX(-10px); transition: opacity 0.6s var(--ease), transform 0.6s var(--ease); transition-delay: calc(0.3s + var(--k) * 0.18s); }
+  :global(.js) .prompt:global(.in) li { opacity: 1; transform: none; }
+  .prompt li.ok :global([data-icon]) { color: var(--verdigris); }
+  .prompt li.off { color: var(--faint); }
+  .prompt li.never { background: rgba(224, 154, 99, 0.1); border: 1px solid rgba(224, 154, 99, 0.25); }
+  .prompt li.never :global([data-icon]) { color: var(--copper); }
+  .prompt li em { margin-left: auto; font-style: normal; font-size: 0.78rem; color: var(--copper); }
+  .prompt-actions { display: flex; justify-content: flex-end; gap: 6px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); font-weight: 600; font-size: 0.9rem; }
+  .prompt-actions span { padding: 10px 18px; border-radius: 999px; color: var(--muted); }
+  .prompt-actions .go { background: var(--verdigris); color: var(--ink); }
+  .prompt figcaption { font-size: 0.8rem; color: var(--faint); }
+
+  .table-wrap { margin-top: 48px; overflow-x: auto; background: rgba(7, 14, 12, 0.72); border-radius: 4px; }
+  table { width: 100%; border-collapse: collapse; min-width: 620px; }
+  th, td { text-align: left; padding: 20px 18px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { font: 600 0.75rem/1 var(--mono); text-transform: uppercase; letter-spacing: 0.07em; color: var(--faint); border-bottom: 2px solid var(--fg); }
+  thead th:last-child { color: var(--verdigris); }
+  tbody th { font-weight: 600; width: 32%; }
+  td { color: var(--muted); }
+  td.neu { color: var(--fg); background: rgba(95, 208, 180, 0.06); }
+
+  .track { margin-top: 72px; position: relative; }
+  .track-line { position: absolute; top: 9px; left: 0; right: 0; height: 2px; background: var(--line-2); overflow: hidden; }
+  .track-line span { position: absolute; inset: 0; transform: scaleX(0); transform-origin: left; background: linear-gradient(90deg, var(--copper), var(--verdigris)); transition: transform 1.8s var(--ease) 0.2s; }
+  .track:global(.in) .track-line span { transform: scaleX(0.14); }
+  :global(html:not(.js)) .track-line span { transform: scaleX(0.14); }
+  .track ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
+  .track li { display: grid; gap: 10px; padding-top: 40px; position: relative; align-content: start; }
+  :global(.js) .track li { opacity: 0; transform: translateY(16px); transition: opacity 0.8s var(--ease), transform 0.8s var(--ease); transition-delay: var(--d); }
+  :global(.js) .track:global(.in) li { opacity: 1; transform: none; }
+  .knot { position: absolute; top: 2px; left: 0; width: 16px; height: 16px; border-radius: 50%; background: var(--bg); border: 2px solid var(--line-2); }
+  .here .knot { background: var(--copper); border-color: var(--copper); box-shadow: 0 0 0 6px rgba(224, 154, 99, 0.18); }
+  .when { font: 600 0.75rem/1 var(--mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--faint); }
+  .here .when { color: var(--copper); }
+  .track h3 { font-size: 1.35rem; }
+  .track p { color: var(--muted); font-size: 0.97rem; }
+
+  .join-head { display: grid; grid-template-columns: 7fr 5fr; gap: clamp(32px, 6vw, 96px); align-items: end; }
+  .join-head h2 { max-width: 12ch; }
+  .join-copy { display: grid; gap: 20px; color: var(--muted); font-size: 1.12rem; }
+  .needs { font-size: 0.98rem; color: var(--faint); display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; }
+  .needs span { color: var(--fg); }
+  .needs i { font-style: normal; color: var(--copper); }
+  .contact { list-style: none; margin: 64px 0 0; padding: 0; border-top: 2px solid var(--fg); }
+  .contact li { border-bottom: 1px solid var(--line); }
+  .contact a, .c-row { position: relative; display: grid; grid-template-columns: 40px 5fr 6fr 28px; gap: 24px; align-items: center; padding: 28px 0; text-decoration: none; color: var(--fg); }
+  .contact a::before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(95, 208, 180, 0.1), transparent 70%); opacity: 0; transition: opacity 0.4s var(--ease); pointer-events: none; }
+  .contact a:hover::before { opacity: 1; }
+  .contact :global(.c-icon) { width: 26px; height: 26px; color: var(--muted); transition: color 0.3s; }
+  .c-name { font-family: var(--display); font-weight: 800; font-variation-settings: "wdth" 80; font-size: clamp(1.8rem, 3.6vw, 3.2rem); letter-spacing: -0.035em; line-height: 1; transition: transform 0.5s var(--ease), color 0.4s; }
+  .c-val { color: var(--muted); }
+  .contact :global(.c-arrow) { width: 24px; height: 24px; color: var(--faint); transition: transform 0.4s var(--ease), color 0.3s; justify-self: end; }
+  .contact a:hover .c-name { transform: translateX(10px); color: var(--verdigris); }
+  .contact a:hover :global(.c-icon) { color: var(--verdigris); }
+  .contact a:hover :global(.c-arrow) { transform: translate(4px, -4px); color: var(--verdigris); }
+  .contact .off .c-row { cursor: not-allowed; }
+  .contact .off .c-name { color: var(--faint); }
+  .c-row em { justify-self: end; font: 600 0.62rem/1 var(--mono); font-style: normal; text-transform: uppercase; letter-spacing: 0.06em; padding: 4px 6px; border-radius: 4px; background: rgba(224, 154, 99, 0.14); color: var(--copper); }
+  .btn.line { border: 1px solid var(--line-2); color: var(--fg); background: rgba(7, 14, 12, 0.6); }
+  .btn.line:hover { border-color: var(--verdigris); transform: translateY(-2px); }
+
+  .faq-grid { display: grid; grid-template-columns: 4fr 8fr; gap: clamp(32px, 6vw, 96px); align-items: start; }
+  .faq-list { border-top: 1px solid var(--line); background: rgba(7, 14, 12, 0.6); }
+  details { border-bottom: 1px solid var(--line); }
+  summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 24px 0; font-weight: 600; font-size: 1.15rem; transition: color 0.2s; }
+  summary:hover { color: var(--verdigris); }
+  summary::-webkit-details-marker { display: none; }
+  .plus { width: 16px; height: 16px; position: relative; flex: none; }
+  .plus::before, .plus::after { content: ""; position: absolute; left: 0; top: 7px; width: 16px; height: 2px; background: currentColor; transition: transform 0.4s var(--ease); }
+  .plus::after { transform: rotate(90deg); }
+  details[open] .plus::after { transform: rotate(0); }
+  details p { color: var(--muted); padding-bottom: 26px; max-width: 62ch; }
+
+  .finale { min-height: 100svh; display: flex; align-items: flex-end; padding-block: 120px 96px; }
+  .finale-inner { display: grid; gap: 22px; justify-items: start; }
+  .finale h2 { font-size: clamp(3.4rem, 10vw, 9.5rem); line-height: 0.85; }
+  .finale p { color: var(--muted); font-size: 1.2rem; max-width: 40ch; }
+
+  .foot { border-top: 1px solid var(--line); padding-block: 40px 88px; background: var(--bg); }
+  .foot-inner { display: flex; gap: 32px; align-items: baseline; flex-wrap: wrap; color: var(--muted); font-size: 0.92rem; }
+  .foot-inner :global(.foot-wm) { font-size: 1.6rem; color: var(--fg); }
+  .legal { color: var(--faint); margin-left: auto; }
+  .nw { white-space: nowrap; }
+
+  @media (max-width: 1000px) {
+    nav { display: none; }
+    .hero { align-items: flex-end; padding-top: 52vh; }
+    .hint { display: none; }
+    .story-inner { grid-template-columns: 1fr; gap: 28px; }
+    .story-rail { grid-auto-flow: column; padding-left: 0; padding-top: 14px; justify-content: start; gap: 16px; }
+    .story-rail::before { left: 0; right: 0; top: 0; bottom: auto; width: auto; height: 2px; }
+    .story-rail::after { top: 0; width: calc(100% * var(--p, 0)); height: 2px; }
+    .rail-step { font-size: 0.68rem; }
+    .frames { min-height: 420px; }
+    .how-grid, .token-grid, .join-head, .faq-grid { grid-template-columns: 1fr; }
+    .contact a, .c-row { grid-template-columns: 32px 1fr 24px; gap: 4px 16px; }
+    .c-val { grid-column: 2; grid-row: 2; font-size: 0.95rem; }
+    .contact :global(.c-arrow), .c-row em { grid-column: 3; grid-row: 1 / span 2; }
+    .stack-wrap { height: 420px; }
+    .first-list li { grid-template-columns: 44px 1fr; }
+    .fl-text { grid-column: 2; }
+    .track ol { grid-template-columns: 1fr 1fr; row-gap: 48px; }
+    .track-line { display: none; }
+    .legal { margin-left: 0; }
+  }
+  @media (max-width: 600px) {
+    .hide-sm { display: none; }
+    .soon-link em { display: none; }
+    .stack { width: 210px; height: 210px; }
+    .stack-wrap { height: 340px; }
+    .stack-wrap:global(.in) .l2 { transform: translateZ(60px); }
+    .stack-wrap:global(.in) .l3 { transform: translateZ(120px); }
+    .track ol { grid-template-columns: 1fr; }
+    .rail-step { letter-spacing: 0.02em; }
+    section { padding-block: 80px; }
+    .nav-inner { height: 60px; gap: 16px; }
+    .logo { font-size: 1.6rem; }
+    .hero { padding-top: 46vh; padding-bottom: 64px; }
+    h1 { font-size: clamp(2.6rem, 12vw, 3.6rem); }
+    .lede { font-size: 1.02rem; }
+    .btn { height: 50px; padding: 0 20px; }
+    .hero .ctas .btn { width: 100%; justify-content: center; }
+    .frames { min-height: 460px; }
+    .frame h2 { font-size: clamp(2.2rem, 10vw, 3rem); }
+    .frame p { font-size: 1.02rem; }
+    h2, .how-copy h2 { font-size: clamp(2.1rem, 9.5vw, 2.9rem); }
+    .first-list li { padding: 20px 0; gap: 8px 14px; }
+    .fl-name { font-size: 1.6rem; }
+    .contact a, .c-row { padding: 22px 0; }
+    .c-name { font-size: 1.7rem; }
+    .finale { min-height: 80svh; }
+    .finale h2 { font-size: clamp(3rem, 15vw, 4.4rem); }
+    .finale .ctas { flex-direction: column; width: 100%; }
+    .finale .ctas .btn { justify-content: center; }
+    .prompt-box { transform: none; padding: 20px; }
+    .prompt li em { margin-left: 27px; flex-basis: 100%; }
+    .foot-inner { flex-direction: column; gap: 12px; }
+  }
+</style>

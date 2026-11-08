@@ -1,0 +1,77 @@
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/bricolage-grotesque";
+@import "@fontsource-variable/jetbrains-mono";
+
+:root {
+  --bg: #070e0c;
+  --bg-2: #0c1714;
+  --bg-3: #12211d;
+  --fg: #eaf3ef;
+  --muted: #9cb6ae;
+  --faint: #66817a;
+  --line: #1c2e29;
+  --line-2: #2a4239;
+  --verdigris: #5fd0b4;
+  --verdigris-deep: #2c7c69;
+  --copper: #e09a63;
+  --copper-deep: #9a5530;
+  --ink: #03120e;
+  --display: "Bricolage Grotesque Variable", system-ui, sans-serif;
+  --body: "Geist Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono Variable", ui-monospace, Consolas, monospace;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html { background: var(--bg); scroll-behavior: smooth; scrollbar-color: var(--line-2) var(--bg); }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--body);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::selection { background: var(--verdigris); color: var(--ink); }
+
+a { color: inherit; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+
+:focus-visible { outline: 2px solid var(--verdigris); outline-offset: 3px; border-radius: 4px; }
+
+h1, h2, h3 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 800;
+  font-variation-settings: "wdth" 80, "opsz" 96;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+  text-wrap: balance;
+}
+h3 { font-weight: 700; letter-spacing: -0.025em; line-height: 1.1; font-variation-settings: "wdth" 90, "opsz" 32; }
+
+p { margin: 0; text-wrap: pretty; }
+
+[data-icon] { width: 1.1em; height: 1.1em; flex: none; }
+
+.wrap {
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding-left: max(20px, env(safe-area-inset-left, 0px));
+  padding-right: max(20px, env(safe-area-inset-right, 0px));
+}
+
+.js .reveal { opacity: 0; transform: translateY(28px); filter: blur(6px); transition: opacity 0.9s var(--ease), transform 0.9s var(--ease), filter 0.9s var(--ease); transition-delay: var(--d, 0s); }
+.js .reveal.in { opacity: 1; transform: none; filter: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .js .reveal { opacity: 1; transform: none; filter: none; transition: none; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+}

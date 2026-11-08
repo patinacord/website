@@ -4,8 +4,9 @@ import Icon from "../components/Icon.astro";
 import Orb from "../components/Orb.astro";
 import Logo from "../components/Logo.astro";
 
-const discordUrl = "https://discord.com/users/859866420887289877";
+const discordUrl = "https://discord.gg/SdNKAFHQmN";
 const xUrl = "https://x.com/patinacord";
+const githubUrl = "https://github.com/patinacord";
 
 const story = [
   { tag: "Before", title: "Discord was a website in a wrapper.", text: "BetterDiscord, then Vencord, edited it while it ran. Thousands of plugins and themes grew on top of it." },
@@ -61,7 +62,7 @@ const headline = "Discord is going native. Your mods are coming with it.".split(
         <a href="#faq">FAQ</a>
       </nav>
       <div class="nav-right">
-        <span class="soon-link" aria-disabled="true" title="Coming soon"><Icon name="github" /><span class="hide-sm">GitHub</span><em>soon</em></span>
+        <a class="src-link" href={githubUrl} target="_blank" rel="noopener"><Icon name="github" /><span class="hide-sm">Source</span></a>
       </div>
     </div>
   </header>
@@ -212,7 +213,7 @@ const headline = "Discord is going native. Your mods are coming with it.".split(
         <div class="join-head">
           <h2 class="reveal">Right now it's one person and a plan.</h2>
           <div class="join-copy reveal">
-            <p>That changes with help. If you write Rust, reverse engineer binaries for fun, like breaking sandboxes, or make themes people actually install, message me and tell me what you'd want to work on.</p>
+            <p>That changes with help. If you write Rust, reverse engineer binaries for fun, like breaking sandboxes, or make themes people actually install, join the Discord server and tell me what you'd want to work on.</p>
             <p class="needs">Looking for <span>Rust</span><i>/</i><span>reverse engineering</span><i>/</i><span>WebAssembly</span><i>/</i><span>security</span><i>/</i><span>themes</span></p>
           </div>
         </div>
@@ -221,7 +222,7 @@ const headline = "Discord is going native. Your mods are coming with it.".split(
             <a href={discordUrl} target="_blank" rel="noopener">
               <Icon name="discord" class="c-icon" />
               <span class="c-name">Discord</span>
-              <span class="c-val">Message me directly</span>
+              <span class="c-val">Join the server for progress</span>
               <Icon name="out" class="c-arrow" />
             </a>
           </li>
@@ -229,17 +230,17 @@ const headline = "Discord is going native. Your mods are coming with it.".split(
             <a href={xUrl} target="_blank" rel="noopener">
               <Icon name="xsocial" class="c-icon" />
               <span class="c-name">@patinacord</span>
-              <span class="c-val">Progress posts and updates</span>
+              <span class="c-val">Follow for progress too</span>
               <Icon name="out" class="c-arrow" />
             </a>
           </li>
-          <li class="reveal off" style="--d:0.12s">
-            <span class="c-row" aria-disabled="true">
+          <li class="reveal" style="--d:0.12s">
+            <a href={githubUrl} target="_blank" rel="noopener">
               <Icon name="github" class="c-icon" />
-              <span class="c-name">GitHub</span>
-              <span class="c-val">Organization goes up soon</span>
-              <em>soon</em>
-            </span>
+              <span class="c-name">Source</span>
+              <span class="c-val">Read the code on GitHub</span>
+              <Icon name="out" class="c-arrow" />
+            </a>
           </li>
         </ul>
       </div>
@@ -265,7 +266,7 @@ const headline = "Discord is going native. Your mods are coming with it.".split(
         <p>That's the whole idea. Something new grows on top of the metal. See you when Discord ships.</p>
         <div class="ctas">
           <a class="btn primary" href={xUrl} target="_blank" rel="noopener"><Icon name="xsocial" /> Follow @patinacord</a>
-          <a class="btn line" href={discordUrl} target="_blank" rel="noopener"><Icon name="discord" /> Discord</a>
+          <a class="btn line" href={discordUrl} target="_blank" rel="noopener"><Icon name="discord" /> Join the Discord</a>
         </div>
       </div>
     </section>
@@ -318,7 +319,8 @@ const headline = "Discord is going native. Your mods are coming with it.".split(
   nav a { color: var(--muted); text-decoration: none; transition: color 0.2s; }
   nav a:hover { color: var(--fg); }
   .nav-right { margin-left: auto; display: flex; gap: 18px; }
-  .soon-link { display: inline-flex; align-items: center; gap: 7px; font-size: 0.9rem; color: var(--muted); cursor: not-allowed; }
+  .src-link { display: inline-flex; align-items: center; gap: 7px; font-size: 0.9rem; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+  .src-link:hover { color: var(--fg); }
   .soon-link em, .btn em { font: 600 0.62rem/1 var(--mono); font-style: normal; text-transform: uppercase; letter-spacing: 0.06em; padding: 4px 6px; border-radius: 4px; background: rgba(224, 154, 99, 0.14); color: var(--copper); }
 
   .hero { min-height: 100svh; display: flex; align-items: center; padding-block: 120px 88px; }
